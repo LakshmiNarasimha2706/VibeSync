@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VibeSync v2.1 - Advanced Biometric Music Recommendation System">
+    <title>VibeSync | Biometric Flow</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Chart.js for History -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="vibe-neutral">
+    <!-- Generative Background Container -->
+    <div id="vibe-canvas"></div>
+
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="VibeSync Logo" class="app-logo">
+                <h1 class="glow-text">VibeSync</h1>
+            </div>
+
+            <div class="header-actions">
+                <div class="settings-container">
+                    <button id="settings-btn" class="settings-gear" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Navigation -->
+        <nav class="dashboard-nav">
+            <button class="nav-tab active" data-tab="vibe-check">Vibe Check</button>
+            <button class="nav-tab" data-tab="situation">Situation</button>
+            <button class="nav-tab" data-tab="soul-sync">Soul Sync</button>
+            <button class="nav-tab" data-tab="history">History</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Tab: Vibe Check -->
+            <section id="vibe-check" class="tab-panel active">
+                <div class="biometric-grid">
+                    <!-- Main Vibe Display (Face + Voice) -->
+                    <div class="vibe-card glass-card main-vibe">
+                        <div class="vibe-visualizer">
+                            <div class="vibe-ring" id="vibe-ring"></div>
+                            <div class="vibe-emoji" id="vibe-emoji">😐</div>
+                        </div>
+                        <div class="vibe-info">
+                            <h2 id="vibe-text">VibeSync</h2>
+                            <p class="vibe-subtitle" id="vibe-status">Ready to analyze...</p>
+
+                            <!-- Combined Confidence Meter -->
+                            <div class="confidence-meter">
+                                <div class="conf-fill" id="conf-fill"></div>
+                                <span id="conf-text">AI Confidence: 0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice Recorder Section (New) -->
+                    <div class="voice-card glass-card">
+                        <h3>Voice Vibe</h3>
+                        <div class="voice-visualizer" id="voice-vis">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                        <p id="voice-status" class="status-text">Tap mic to record (5s)</p>
+                        <button id="record-btn" class="record-btn">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <!-- Action Buttons: Main (Face) & Secondary (Combined) -->
+                <div class="vibe-actions" style="flex-direction: column; gap: 1rem; align-items: center;">
+                    <!-- Original Face Capture -->
+                    <button class="btn-primary recheck-btn" id="recheck-btn">
+                        <span class="icon">📷</span> Capture Vibe (Face)
+                    </button>
+
+                    <!-- Combined Option -->
+                    <button class="btn-primary" id="analyze-combined-btn"
+                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); font-size: 0.9rem;">
+                        <span class="icon">✨</span> Add Voice Context (5s)
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tab: Situation Mode -->
+            <section id="situation" class="tab-panel">
+                <div class="situation-grid">
+                    <button class="situation-btn glass-card" data-mode="Study">
+                        <span class="icon">📚</span>
+                        <span>Study</span>
+                    </button>
+                    <button class="situation-btn glass-card" data-mode="Workout">
+                        <span class="icon">💪</span>
+                        <span>Workout</span>
+                    </button>
+                    <button class="situation-btn glass-card" data-mode="Travel">
+                        <span class="icon">✈️</span>
+                        <span>Travel</span>
+                    </button>
+                    <button class="situation-btn glass-card" data-mode="Relaxation">
+                        <span class="icon">🧘</span>
+                        <span>Relaxation</span>
+                    </button>
+                    <button class="situation-btn glass-card" data-mode="Party">
+                        <span class="icon">🎉</span>
+                        <span>Party</span>
+                    </button>
+                </div>
+                <p class="helper-text">Manual mode overrides biometric detection.</p>
+            </section>
+
+            <!-- Soul Sync Tab -->
+            <section id="soul-sync" class="tab-panel">
+                <div class="sync-grid">
+                    <div class="sync-setup glass-card">
+                        <h3>Connect Room</h3>
+                        <div class="input-group">
+                            <input type="text" id="user-name" placeholder="Your Name" value="User">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="room-id" placeholder="Enter Room Code">
+                            <button id="gen-room-btn" class="soul-btn secondary" title="Generate Random Code">🎲 New
+                                Room</button>
+                        </div>
+                        <button id="join-room-btn" class="soul-btn primary" style="width: 100%; margin-top: 10px;">Sync
+                            Souls</button>
+                        <p class="status-tip">Enter a code to join, or tap 🎲 to start a new room.</p>
+                    </div>
+
+                    <div class="sync-lobby glass-card hidden" id="active-lobby">
+                        <div class="lobby-header">
+                            <span class="room-tag">ROOM: <b id="display-room-id">---</b></span>
+                            <span class="user-count"><i id="active-count">0</i> Users Syncing</span>
+                        </div>
+
+                        <div class="group-vibe-monitor">
+                            <h4>Group Vibe</h4>
+                            <div class="vibe-radar-container">
+                                <div id="group-vibe-dot" class="vibe-dot"></div>
+                                <div class="radar-axes">
+                                    <span>Energy</span>
+                                    <span>Mood</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="user-list" id="soul-users">
+                            <!-- Users spawn here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: History -->
+            <section id="history" class="tab-panel">
+                <div class="analytics-grid">
+                    <div class="chart-card glass-card">
+                        <h3>Vibe Trends (7 Days)</h3>
+                        <div class="chart-container">
+                            <canvas id="trends-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="activity-log-card glass-card">
+                        <h3>Activity Log</h3>
+                        <div id="history-logs" class="history-logs">
+                            <p class="empty-state">No emotional data recorded yet</p>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Music Playback History -->
+                    <div class="music-history-card glass-card" style="grid-column: 1 / -1; margin-top: 1rem;">
+                        <h3>Music Playback History</h3>
+                        <div id="music-history-list" class="history-logs">
+                            <p class="empty-state">No music played yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Compact Player UI -->
+        <footer class="player-footer glass-card">
+            <div class="player-track">
+                <div class="mini-art">
+                    <div class="vinyl-spin"></div>
+                </div>
+                <div class="mini-info">
+                    <h4 id="track-title">Ready to flow...</h4>
+                    <p id="track-artist">Select a vibe to start</p>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <div class="voice-feedback">
+                </div>
+                <div class="progress-wrap">
+                    <span class="time" id="current-time">0:00</span>
+                    <div class="progress-container">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <span class="time" id="total-time">0:00</span>
+                </div>
+                <div class="control-btns">
+                    <button class="ctrl-btn" id="prev-btn">⏮</button>
+                    <button class="ctrl-btn play" id="play-btn">▶</button>
+                    <button class="ctrl-btn" id="next-btn">⏭</button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Camera Modal (Safety First) -->
+    <div id="camera-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <button class="close-modal">&times;</button>
+            <h3>Biometric Flow</h3>
+            <div class="sensor-info">Face Analysis</div>
+            <div class="video-container">
+                <video id="camera-preview" autoplay playsinline></video>
+                <div class="scan-line"></div>
+            </div>
+            <button id="capture-btn" class="btn-capture">Capture Essence</button>
+        </div>
+    </div>
+
+    <!-- Settings Side DRAWER -->
+    <div id="settings-drawer-overlay" class="drawer-overlay hidden">
+        <aside id="settings-drawer" class="settings-drawer glass-panel">
+            <div class="drawer-header">
+                <h2>Settings</h2>
+                <button id="close-drawer-btn" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="drawer-body">
+                <!-- Profile Section -->
+                <div class="settings-section">
+                    <h3>User Profile</h3>
+                    <div class="profile-card">
+                        <div class="profile-avatar large">
+                            {{ user.name[0] | upper if user.name else 'U' }}
+                        </div>
+                        <div class="profile-details">
+                            <h3>{{ user.name or 'User' }}</h3>
+                            <p>{{ user.email or 'Guest' }}</p>
+                            <span class="badge">Google Signed In</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Library -->
+                <div class="settings-section">
+                    <h3>Music Library</h3>
+                    <div class="setting-card">
+                        <div class="setting-row-flex">
+                            <span>Status:</span>
+                            <span class="status-ok">Active</span>
+                        </div>
+                        <div class="setting-row-flex">
+                            <span>Songs:</span>
+                            <span>{{ 120 }}</span> <!-- Placeholder for dynamic count if available -->
+                        </div>
+                        <button id="scan-lib-btn" class="action-btn">
+                            <i class="fas fa-sync-alt"></i> Re-scan Library
+                        </button>
+                        <p class="microcopy">Scans local folder for new emotion-tagged tracks.</p>
+                    </div>
+                </div>
+
+                <!-- Experience & Media -->
+                <div class="settings-section">
+                    <h3>Experience</h3>
+                    <div class="setting-row">
+                        <label>Language</label>
+                        <select id="modal-lang" class="settings-select">
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Telugu">Telugu</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label>Camera</label>
+                        <select id="camera-select" class="settings-select">
+                            <option value="default">Default</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label>Visuals</label>
+                        <div class="radio-group" id="visual-intensity">
+                            <button class="radio-btn" data-val="low">Low</button>
+                            <button class="radio-btn active" data-val="med">Med</button>
+                            <button class="radio-btn" data-val="high">High</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy -->
+                <div class="settings-section">
+                    <h3>Privacy</h3>
+                    <div class="setting-card">
+                        <p class="microcopy">Emotion data is session-only. Face data is not stored.</p>
+                        <div class="setting-row">
+                            <label>Blur Camera</label>
+                            <div class="toggle-switch" id="privacy-toggle"></div>
+                        </div>
+                        <button id="clear-hist-btn" class="action-btn danger-text">
+                            Clear Listening History
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer LOGOUT -->
+            <div class="drawer-footer">
+                <button id="logout-trigger-btn" class="logout-btn-isolated">
+                    Log Out
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Custom Logout Confirmation Dialog -->
+    <div id="logout-dialog" class="modal-overlay hidden" style="z-index: 2100;">
+        <div class="dialog-card glass-card">
+            <h3>Log Out?</h3>
+            <p>Are you sure you want to end this session?</p>
+            <div class="dialog-actions">
+                <button id="cancel-logout" class="dialog-btn secondary">Cancel</button>
+                <a href="/logout" class="dialog-btn primary-danger">Log Out</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emotion Verification Layer (EVL) Overlay -->
+    <div id="evl-overlay" class="modal-overlay hidden" style="z-index: 2200;">
+        <div class="evl-card glass-card">
+            <div class="evl-header">
+                <span class="icon">🧠</span>
+                <h3>Cognitive Verification</h3>
+            </div>
+
+            <div class="evl-body">
+                <p id="evl-question" class="evl-question-text">Loading question...</p>
+                <div class="evl-progress">
+                    <div id="evl-progress-bar" class="evl-progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="evl-actions">
+                <button class="evl-btn yes-btn" onclick="evl.answer('yes')">Yes</button>
+                <button class="evl-btn no-btn" onclick="evl.answer('no')">No</button>
+                <button class="evl-btn skip-btn" onclick="evl.finish()">Stop & Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="{{ url_for('static', filename='js/visuals.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/soulsync.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/evl.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+flask
+deepface
+tf-keras
+opencv-python
+numpy
+flask-socketio
+python-dotenv
+authlib
+flask-login
+requests
+librosa
+soundfile

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VibeSync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-area">
+                <!-- Simple SVG Logo Placeholder -->
+                <div class="logo-box">
+                    <i class="fas fa-wave-square fa-2x" style="color: #a855f7;"></i>
+                    <span class="logo-text-small">VIBESYNC</span>
+                </div>
+            </div>
+
+            <h1 class="login-title">VibeSync</h1>
+
+            <form action="/login" method="POST" class="login-form">
+                <div class="input-group">
+                    <input type="email" name="email" placeholder="mymailbro54@gmail.com" required class="glass-input">
+                </div>
+
+                <!-- Hidden password field for now, or just implicit dev auth -->
+                <div class="input-group" style="margin-top: 10px;">
+                    <input type="password" name="password" placeholder="Password (Test: 123456)" required
+                        class="glass-input">
+                </div>
+
+                <button type="submit" class="auth-btn purple-btn">Continue</button>
+            </form>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-callback="handleGoogleLogin"
+                data-auto_prompt="false">
+            </div>
+
+            <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+                data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left">
+            </div>
+
+            <script src="https://accounts.google.com/gsi/client" async defer></script>
+            <script>
+                function handleGoogleLogin(response) {
+                    // console.log("Google response:", response);
+                    fetch("/auth/google", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ token: response.credential })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = "/";
+                            } else {
+                                alert("Login failed: " + (data.error || "Unknown error"));
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Auth Error:", err);
+                            alert("Authentication error. Check console.");
+                        });
+                }
+            </script>
+        </div>
+    </div>
+</body>
+
+</html>
